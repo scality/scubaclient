@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "outDir": "./lib",
+        "allowJs": false,
+        "target": "es2016",
+        "alwaysStrict": true,
+        "skipLibCheck": false,
+        "module": "commonjs",
+        "declaration": true                                 /* Generate .d.ts files from TypeScript and JavaScript files in your project. */
+    },
+    "include": [
+        "src/*.ts",
+        "src/*/*.ts",
+        "index.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "tests"
+    ]
+}
