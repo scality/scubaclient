@@ -79,7 +79,7 @@ export default class ScubaClient {
         const year = lpad(date.getFullYear(), 4);
         const month = lpad(date.getMonth(), 2);
         const day = lpad(date.getDate(), 2);
-        const dateString = `${year}${month}${day}`;
+        const dateString = `${year}-${month}-${day}`;
         const resp = (await this._api.getMetrics(metricsClass, resourceName, dateString, undefined, {
             ...this._defaultReqOptions,
             ...options,
