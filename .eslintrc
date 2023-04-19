@@ -1,0 +1,14 @@
+{
+    "extends": ["scality", "plugin:import/typescript", "prettier"],
+    "plugins": ["@typescript-eslint"],
+    "parser": "@typescript-eslint/parser",
+    "root": true,
+    "rules": {
+        "import/extensions": "off",
+        "no-restricted-syntax": "off",
+        "no-underscore-dangle": "off"
+    },
+    "parserOptions": {
+        "tsconfigRootDir": "."
+    }
+}

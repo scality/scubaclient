@@ -1,0 +1,7 @@
+trailingComma: all
+useTabs: False
+tabWidth: 4
+arrowParens: avoid
+singleQuote: True
+semi: True
+printWidth: 120

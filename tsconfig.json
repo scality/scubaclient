@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "outDir": "./lib",
+        "allowJs": false,
+        "target": "es2016",
+        "alwaysStrict": true,
+        "skipLibCheck": false,
+        "module": "commonjs",
+        "declaration": true
+    },
+    "include": [
+        "src/*.ts",
+        "index.ts"
+    ],
+    "exclude": [
+        "node_modules",
+        "tests"
+    ]
+}
