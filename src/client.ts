@@ -23,7 +23,7 @@ export type ScubaClientParameters = Omit<
 export type ScubaMetrics = {
     objectsTotal: number;
     bytesTotal: number;
-    metricClass: string;
+    metricsClass: string;
     resourceName: string;
 };
 
