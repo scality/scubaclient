@@ -25,6 +25,7 @@ export type ScubaMetrics = {
     bytesTotal: number;
     metricsClass: string;
     resourceName: string;
+    id?: number;
 };
 
 function lpad(num: number, digits: number) {
