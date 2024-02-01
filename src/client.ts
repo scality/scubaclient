@@ -1,11 +1,17 @@
 import * as http from 'http';
 import * as https from 'https';
 
-import { AxiosRequestConfig } from 'axios';
+import globalAxios, { AxiosRequestConfig, AxiosInstance } from 'axios';
+import { aws4Interceptor } from 'aws4-axios';
 import { Configuration, ConfigurationParameters } from './configuration';
 import { ScubaApi } from './api';
 
 export type MetricsClass = 'account' | 'bucket' | 'service';
+
+export type Aws4InterceptorParameter = Parameters<typeof aws4Interceptor>[0];
+export type ScubaAuth = {
+    awsV4?: Aws4InterceptorParameter;
+};
 
 export type ScubaClientParameters = Omit<
     ConfigurationParameters,
@@ -18,6 +24,7 @@ export type ScubaClientParameters = Omit<
     cert?: string;
     ca?: string;
     keepAlive?: boolean;
+    auth?: ScubaAuth;
 };
 
 export type ScubaMetrics = {
@@ -37,8 +44,13 @@ export default class ScubaClient {
 
     private _defaultReqOptions: { httpAgent: http.Agent; httpsAgent: https.Agent };
 
+    private _axios: AxiosInstance;
+
+    /** Id of axios interceptor */
+    private _authInterceptor: number | null = null;
+
     constructor(params?: ScubaClientParameters) {
-        const { basePath, host, port, useHttps, key, cert, ca, keepAlive } = params || {};
+        const { basePath, host, port, useHttps, key, cert, ca, keepAlive, auth } = params || {};
         const proto = useHttps ? 'https' : 'http';
         const _host = host || 'localhost';
         const _port = port || 8100;
@@ -55,8 +67,48 @@ export default class ScubaClient {
             }),
         };
 
+        this._axios = globalAxios.create();
+
         // If basePath is a FQDN then it overrides the baked in config from the spec
-        this._api = new ScubaApi(new Configuration({ ...params, basePath: connectionString }));
+        this._api = new ScubaApi(new Configuration({ ...params, basePath: connectionString }), undefined, this._axios);
+
+        if (auth) {
+            this.setAuth(auth);
+        }
+    }
+
+    /**
+     * Remove current auth axios interceptor and add a new one
+     * @param {ScubaAuth} auth Authentication method and options
+     * @param {Aws4InterceptorParameter} [auth.awsV4] - parameters passed to aws4-axios
+     * @return {undefined}
+     */
+    setAuth(auth: ScubaAuth): void {
+        if (this._authInterceptor !== null && this._authInterceptor !== undefined) {
+            this._axios.interceptors.request.eject(this._authInterceptor);
+            this._authInterceptor = null;
+        }
+
+        if (auth.awsV4) {
+            const interceptor = aws4Interceptor({
+                instance: this._axios,
+                ...auth.awsV4,
+                options: {
+                    service: 's3',
+                    ...auth.awsV4.options,
+                },
+            });
+
+            // Fix lib aws4-axios that doesn't return proper axios headers that can
+            // break some axios actions.
+            // This can be removed once this PR with this comment is implemented:
+            // https://github.com/jamesmbourne/aws4-axios/pull/1248#discussion_r1474243371
+            this._authInterceptor = this._axios.interceptors.request.use(async req => {
+                const signedReq = await interceptor(req);
+                signedReq.headers = new globalAxios.AxiosHeaders(signedReq.headers);
+                return signedReq;
+            });
+        }
     }
 
     async getLatestMetrics(
