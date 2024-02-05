@@ -1,16 +1,24 @@
 import * as http from 'http';
 import * as https from 'https';
 
-import globalAxios, { AxiosRequestConfig, AxiosInstance } from 'axios';
-import { aws4Interceptor } from 'aws4-axios';
-import { Configuration, ConfigurationParameters } from './configuration';
+import { SignatureV4 } from '@smithy/signature-v4';
+import globalAxios, { AxiosRequestConfig, AxiosInstance, AxiosHeaders } from 'axios';
+import { Sha256 } from '@aws-crypto/sha256-js';
+import { URL } from 'url';
+import { parse as parseQuerystring } from 'querystring';
 import { ScubaApi } from './api';
+import { Configuration, ConfigurationParameters } from './configuration';
 
 export type MetricsClass = 'account' | 'bucket' | 'service';
 
-export type Aws4InterceptorParameter = Parameters<typeof aws4Interceptor>[0];
+type WithOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
+export type SignatureParameter = WithOptional<
+    ConstructorParameters<typeof SignatureV4>[0],
+    'service' | 'region' | 'sha256'
+>;
 export type ScubaAuth = {
-    awsV4?: Aws4InterceptorParameter;
+    awsV4?: SignatureParameter;
 };
 
 export type ScubaClientParameters = Omit<
@@ -90,23 +98,33 @@ export default class ScubaClient {
         }
 
         if (auth.awsV4) {
-            const interceptor = aws4Interceptor({
-                instance: this._axios,
+            const signer = new SignatureV4({
+                service: 's3',
+                sha256: Sha256,
+                region: 'us-east-1',
                 ...auth.awsV4,
-                options: {
-                    service: 's3',
-                    ...auth.awsV4.options,
-                },
             });
 
-            // Fix lib aws4-axios that doesn't return proper axios headers that can
-            // break some axios actions.
-            // This can be removed once this PR with this comment is implemented:
-            // https://github.com/jamesmbourne/aws4-axios/pull/1248#discussion_r1474243371
             this._authInterceptor = this._axios.interceptors.request.use(async req => {
-                const signedReq = await interceptor(req);
-                signedReq.headers = new globalAxios.AxiosHeaders(signedReq.headers);
-                return signedReq;
+                const { host, hostname, pathname, protocol, search } = new URL(this._axios.getUri(req));
+                // remove first char '?' from qs
+                const query = parseQuerystring(search?.substring(1)) as Record<string, string | string[]>;
+
+                const requestToSign = {
+                    method: req.method?.toUpperCase()!,
+                    headers: { host, ...(req.headers as Record<string, any>) },
+                    body: req.data,
+                    host,
+                    hostname,
+                    path: pathname,
+                    protocol,
+                    query,
+                };
+                const res = await signer.sign(requestToSign);
+
+                // eslint-disable-next-line no-param-reassign
+                req.headers = new AxiosHeaders(res.headers);
+                return req;
             });
         }
     }
