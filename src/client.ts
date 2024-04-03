@@ -133,8 +133,9 @@ export default class ScubaClient {
         metricsClass: MetricsClass,
         resourceName: string,
         options?: AxiosRequestConfig,
+        body?: any,
     ): Promise<ScubaMetrics> {
-        const resp = (await this._api.getLatestMetrics(metricsClass, resourceName, undefined, {
+        const resp = (await this._api.getLatestMetrics(metricsClass, resourceName, body, {
             ...this._defaultReqOptions,
             ...options,
         })) as any;
@@ -146,12 +147,13 @@ export default class ScubaClient {
         resourceName: string,
         date: Date,
         options?: AxiosRequestConfig,
+        body?: any,
     ): Promise<ScubaMetrics> {
         const year = lpad(date.getUTCFullYear(), 4);
         const month = lpad(date.getUTCMonth() + 1, 2);
         const day = lpad(date.getUTCDate(), 2);
         const dateString = `${year}-${month}-${day}`;
-        const resp = (await this._api.getMetrics(metricsClass, resourceName, dateString, undefined, {
+        const resp = (await this._api.getMetrics(metricsClass, resourceName, dateString, body, {
             ...this._defaultReqOptions,
             ...options,
         })) as any;
