@@ -159,4 +159,8 @@ export default class ScubaClient {
         })) as any;
         return resp.data;
     }
+
+    async healthCheck(options?: AxiosRequestConfig): Promise<void> {
+        await this._api.healthCheck({ ...this._defaultReqOptions, ...options });
+    }
 }

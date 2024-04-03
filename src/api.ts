@@ -147,6 +147,38 @@ export const ScubaApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        /**
+         *
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        healthCheck: async (options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = '/health/deep';
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options };
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {
+                ...localVarHeaderParameter,
+                ...headersFromBaseOptions,
+            };
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     };
 };
 
@@ -202,6 +234,16 @@ export const ScubaApiFp = function (configuration?: Configuration) {
                 body,
                 options,
             );
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getHealthCheck(
+            options?: AxiosRequestConfig,
+        ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.healthCheck(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     };
@@ -291,6 +333,18 @@ export class ScubaApi extends BaseAPI {
     ) {
         return ScubaApiFp(this.configuration)
             .getMetrics(metricsClass, resourceName, metricsDate, body, options)
+            .then(request => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Health check endpoint
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ScubaApi
+     */
+    public healthCheck(options?: AxiosRequestConfig) {
+        return ScubaApiFp(this.configuration)
+            .getHealthCheck(options)
             .then(request => request(this.axios, this.basePath));
     }
 }
