@@ -41,6 +41,7 @@ export type ScubaMetrics = {
     metricsClass: string;
     resourceName: string;
     id?: number;
+    date?: string;
 };
 
 function lpad(num: number, digits: number) {
