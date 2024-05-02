@@ -41,6 +41,11 @@ export type ScubaMetrics = {
     metricsClass: string;
     resourceName: string;
     id?: number;
+    date?: string;
+};
+
+export type HealthCheckResponse = {
+    date?: string;
 };
 
 function lpad(num: number, digits: number) {
@@ -160,7 +165,8 @@ export default class ScubaClient {
         return resp.data;
     }
 
-    async healthCheck(options?: AxiosRequestConfig): Promise<void> {
-        await this._api.healthCheck({ ...this._defaultReqOptions, ...options });
+    async healthCheck(options?: AxiosRequestConfig): Promise<HealthCheckResponse> {
+        const resp = (await this._api.healthCheck({ ...this._defaultReqOptions, ...options })) as any;
+        return resp.data;
     }
 }
