@@ -33,6 +33,13 @@ import type { RequestArgs } from './base';
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, BaseAPI, RequiredError } from './base';
 
+export enum AdminActions {
+    AdminStartIngest = 'AdminStartIngest',
+    AdminStopIngest = 'AdminStopIngest',
+    AdminReadRaftCseq = 'AdminReadRaftCseq',
+    AdminTriggerRepair = 'AdminTriggerRepair',
+}
+
 /**
  *
  * @export
@@ -179,6 +186,53 @@ export const ScubaApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        /**
+         *
+         * @param {AdminActions} action
+         * @param {string} recordLog
+         * @param {any} [body]
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        admin: async (
+            action: AdminActions,
+            recordLog: string,
+            body?: any,
+            options: AxiosRequestConfig = {},
+        ): Promise<RequestArgs> => {
+            // verify required parameter 'action' is not null or undefined
+            assertParamExists('admin', 'action', action);
+            // verify required parameter 'recordLog' is not null or undefined
+            assertParamExists('admin', 'recordLog', recordLog);
+
+            const localVarPath = '/admin';
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options };
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = { action, recordLog } as any;
+
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {
+                ...localVarHeaderParameter,
+                ...headersFromBaseOptions,
+                ...options.headers,
+            };
+            localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration);
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     };
 };
 
@@ -246,6 +300,23 @@ export const ScubaApiFp = function (configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.healthCheck(options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        /**
+         *
+         * @param {AdminActions} action
+         * @param {string} recordLog
+         * @param {any} [body]
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async admin(
+            action: AdminActions,
+            recordLog: string,
+            body?: any,
+            options?: AxiosRequestConfig,
+        ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.admin(action, recordLog, body, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
     };
 };
 
@@ -288,6 +359,17 @@ export const ScubaApiFactory = function (configuration?: Configuration, basePath
             return localVarFp
                 .getMetrics(metricsClass, resourceName, metricsDate, body, options)
                 .then(request => request(axios, basePath));
+        },
+        /**
+         *
+         * @param {AdminActions} action
+         * @param {string} recordLog
+         * @param {any} [body]
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        admin(action: AdminActions, recordLog: string, body?: any, options?: any): AxiosPromise<void> {
+            return localVarFp.admin(action, recordLog, body, options).then(request => request(axios, basePath));
         },
     };
 };
@@ -345,6 +427,20 @@ export class ScubaApi extends BaseAPI {
     public healthCheck(options?: AxiosRequestConfig) {
         return ScubaApiFp(this.configuration)
             .getHealthCheck(options)
+            .then(request => request(this.axios, this.basePath));
+    }
+
+    /**
+     *
+     * @param {AdminActions} action
+     * @param {string} recordLog
+     * @param {any} [body]
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public admin(action: AdminActions, recordLog: string, body?: any, options?: AxiosRequestConfig) {
+        return ScubaApiFp(this.configuration)
+            .admin(action, recordLog, body, options)
             .then(request => request(this.axios, this.basePath));
     }
 }

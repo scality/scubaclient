@@ -6,7 +6,7 @@ import globalAxios, { AxiosRequestConfig, AxiosInstance, AxiosHeaders } from 'ax
 import { Sha256 } from '@aws-crypto/sha256-js';
 import { URL } from 'url';
 import { parse as parseQuerystring } from 'querystring';
-import { ScubaApi } from './api';
+import { ScubaApi, AdminActions } from './api';
 import { Configuration, ConfigurationParameters } from './configuration';
 
 export type MetricsClass = 'account' | 'bucket' | 'service';
@@ -167,6 +167,19 @@ export default class ScubaClient {
 
     async healthCheck(options?: AxiosRequestConfig): Promise<HealthCheckResponse> {
         const resp = (await this._api.healthCheck({ ...this._defaultReqOptions, ...options })) as any;
+        return resp.data;
+    }
+
+    async admin(
+        action: AdminActions,
+        recordLog: string,
+        options?: AxiosRequestConfig,
+        body?: any,
+    ): Promise<ScubaMetrics> {
+        const resp = (await this._api.admin(action, recordLog, body, {
+            ...this._defaultReqOptions,
+            ...options,
+        })) as any;
         return resp.data;
     }
 }
