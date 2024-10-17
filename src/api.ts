@@ -189,21 +189,21 @@ export const ScubaApiAxiosParamCreator = function (configuration?: Configuration
         /**
          *
          * @param {AdminActions} action
-         * @param {string} recordLog
+         * @param {string} logId
          * @param {any} [body]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         admin: async (
             action: AdminActions,
-            recordLog: string,
+            logId: string,
             body?: any,
             options: AxiosRequestConfig = {},
         ): Promise<RequestArgs> => {
             // verify required parameter 'action' is not null or undefined
             assertParamExists('admin', 'action', action);
-            // verify required parameter 'recordLog' is not null or undefined
-            assertParamExists('admin', 'recordLog', recordLog);
+            // verify required parameter 'logId' is not null or undefined
+            assertParamExists('admin', 'logId', logId);
 
             const localVarPath = '/admin';
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -215,7 +215,7 @@ export const ScubaApiAxiosParamCreator = function (configuration?: Configuration
 
             const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options };
             const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = { action, recordLog } as any;
+            const localVarQueryParameter = { action, logId } as any;
 
             localVarHeaderParameter['Content-Type'] = 'application/json';
 
@@ -303,18 +303,18 @@ export const ScubaApiFp = function (configuration?: Configuration) {
         /**
          *
          * @param {AdminActions} action
-         * @param {string} recordLog
+         * @param {string} logId
          * @param {any} [body]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         async admin(
             action: AdminActions,
-            recordLog: string,
+            logId: string,
             body?: any,
             options?: AxiosRequestConfig,
         ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.admin(action, recordLog, body, options);
+            const localVarAxiosArgs = await localVarAxiosParamCreator.admin(action, logId, body, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
     };
@@ -363,13 +363,13 @@ export const ScubaApiFactory = function (configuration?: Configuration, basePath
         /**
          *
          * @param {AdminActions} action
-         * @param {string} recordLog
+         * @param {string} logId
          * @param {any} [body]
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        admin(action: AdminActions, recordLog: string, body?: any, options?: any): AxiosPromise<void> {
-            return localVarFp.admin(action, recordLog, body, options).then(request => request(axios, basePath));
+        admin(action: AdminActions, logId: string, body?: any, options?: any): AxiosPromise<void> {
+            return localVarFp.admin(action, logId, body, options).then(request => request(axios, basePath));
         },
     };
 };
@@ -433,14 +433,14 @@ export class ScubaApi extends BaseAPI {
     /**
      *
      * @param {AdminActions} action
-     * @param {string} recordLog
+     * @param {string} logId
      * @param {any} [body]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    public admin(action: AdminActions, recordLog: string, body?: any, options?: AxiosRequestConfig) {
+    public admin(action: AdminActions, logId: string, body?: any, options?: AxiosRequestConfig) {
         return ScubaApiFp(this.configuration)
-            .admin(action, recordLog, body, options)
+            .admin(action, logId, body, options)
             .then(request => request(this.axios, this.basePath));
     }
 }
