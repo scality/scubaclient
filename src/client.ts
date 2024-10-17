@@ -48,6 +48,16 @@ export type HealthCheckResponse = {
     date?: string;
 };
 
+type AdminResponseCseq = {
+    logId: string;
+    cseq: number;
+}
+
+type AdminResponseRPC = {
+    done: boolean;
+    description?: string;
+}
+
 function lpad(num: number, digits: number) {
     return num.toString().padStart(digits, '0');
 }
@@ -170,7 +180,7 @@ export default class ScubaClient {
         return resp.data;
     }
 
-    async admin(action: AdminActions, logId: string, options?: AxiosRequestConfig, body?: any): Promise<void> {
+    async admin(action: AdminActions, logId: string, options?: AxiosRequestConfig, body?: any): Promise<AdminResponseCseq|AdminResponseRPC> {
         const resp = (await this._api.admin(action, logId, body, {
             ...this._defaultReqOptions,
             ...options,
