@@ -170,8 +170,8 @@ export default class ScubaClient {
         return resp.data;
     }
 
-    async admin(action: AdminActions, recordLog: string, options?: AxiosRequestConfig, body?: any): Promise<void> {
-        const resp = (await this._api.admin(action, recordLog, body, {
+    async admin(action: AdminActions, logId: string, options?: AxiosRequestConfig, body?: any): Promise<void> {
+        const resp = (await this._api.admin(action, logId, body, {
             ...this._defaultReqOptions,
             ...options,
         })) as any;
