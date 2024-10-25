@@ -49,7 +49,7 @@ export type HealthCheckResponse = {
 };
 
 export type AdminResponseCseq = {
-    logId: string;
+    sessionId: string;
     cseq: number;
 };
 
@@ -177,11 +177,11 @@ export default class ScubaClient {
 
     async admin(
         action: AdminActions,
-        logId: string,
+        sessionId: string,
         options?: AxiosRequestConfig,
         body?: any,
     ): Promise<AdminResponseCseq | void> {
-        const resp = (await this._api.admin(action, logId, body, {
+        const resp = (await this._api.admin(action, sessionId, body, {
             ...this._defaultReqOptions,
             ...options,
         })) as any;
