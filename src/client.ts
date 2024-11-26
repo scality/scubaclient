@@ -6,7 +6,7 @@ import globalAxios, { AxiosRequestConfig, AxiosInstance, AxiosHeaders } from 'ax
 import { Sha256 } from '@aws-crypto/sha256-js';
 import { URL } from 'url';
 import { parse as parseQuerystring } from 'querystring';
-import { ScubaApi, AdminActions } from './api';
+import { ScubaApi, AdminActions, GetMetricsBatchBody } from './api';
 import { Configuration, ConfigurationParameters } from './configuration';
 
 export type MetricsClass = 'account' | 'bucket' | 'service';
@@ -164,6 +164,22 @@ export default class ScubaClient {
         const day = lpad(date.getUTCDate(), 2);
         const dateString = `${year}-${month}-${day}`;
         const resp = (await this._api.getMetrics(metricsClass, resourceName, dateString, body, {
+            ...this._defaultReqOptions,
+            ...options,
+        })) as any;
+        return resp.data;
+    }
+
+    async getMetricsBatch(
+        metricsClass: MetricsClass,
+        body: GetMetricsBatchBody,
+        options?: AxiosRequestConfig,
+    ): Promise<ScubaMetrics> {
+        // const year = lpad(date.getUTCFullYear(), 4);
+        // const month = lpad(date.getUTCMonth() + 1, 2);
+        // const day = lpad(date.getUTCDate(), 2);
+        // const dateString = `${year}-${month}-${day}`;
+        const resp = (await this._api.getMetricsBatch(metricsClass, body, {
             ...this._defaultReqOptions,
             ...options,
         })) as any;
