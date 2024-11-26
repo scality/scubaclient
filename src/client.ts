@@ -53,6 +53,43 @@ export type AdminResponseCseq = {
     cseq: number;
 };
 
+export type ScubaHttpError = {
+    code: number;
+    description: string;
+}
+
+export type GetMetricsBatchResponseDateMetrics = {
+    date: string;
+    bytesTotal: number;
+    objectsTotal: number;
+};
+
+export type GetMetricsBatchResponseDateError = {
+    date: string;
+    error: ScubaHttpError;
+};
+
+export type GetMetricsBatchResponseDate = GetMetricsBatchResponseDateMetrics | GetMetricsBatchResponseDateError;
+
+export type GetMetricsBatchResponseResourceMetrics = {
+    metricsClass: MetricsClass;
+    resourceName: string;
+    metrics: GetMetricsBatchResponseDate[];
+};
+
+export type GetMetricsBatchResponseResourceError = {
+    metricsClass: MetricsClass;
+    resourceName: string;
+    error: ScubaHttpError;
+};
+
+export type GetMetricsBatchResponseResource = GetMetricsBatchResponseResourceMetrics | GetMetricsBatchResponseResourceError;
+
+export type GetMetricsBatchResponse = {
+    metrics: GetMetricsBatchResponseResource[];
+};
+
+
 function lpad(num: number, digits: number) {
     return num.toString().padStart(digits, '0');
 }
@@ -174,7 +211,7 @@ export default class ScubaClient {
         metricsClass: MetricsClass,
         body: GetMetricsBatchBody,
         options?: AxiosRequestConfig,
-    ): Promise<ScubaMetrics> {
+    ): Promise<GetMetricsBatchResponse> {
         // const year = lpad(date.getUTCFullYear(), 4);
         // const month = lpad(date.getUTCMonth() + 1, 2);
         // const day = lpad(date.getUTCDate(), 2);
