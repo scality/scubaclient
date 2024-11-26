@@ -360,7 +360,7 @@ export const ScubaApiFp = function (configuration?: Configuration) {
             body: GetMetricsBatchBody,
             options?: AxiosRequestConfig,
         ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getMetrics(metricsClass, body, options);
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getMetricsBatch(metricsClass, body, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -503,7 +503,7 @@ export class ScubaApi extends BaseAPI {
      */
     public getMetricsBatch(metricsClass: MetricsClass, body: GetMetricsBatchBody, options?: AxiosRequestConfig) {
         return ScubaApiFp(this.configuration)
-            .getMetrics(metricsClass, body, options)
+            .getMetricsBatch(metricsClass, body, options)
             .then(request => request(this.axios, this.basePath));
     }
 
