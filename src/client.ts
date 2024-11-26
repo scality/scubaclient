@@ -6,7 +6,7 @@ import globalAxios, { AxiosRequestConfig, AxiosInstance, AxiosHeaders } from 'ax
 import { Sha256 } from '@aws-crypto/sha256-js';
 import { URL } from 'url';
 import { parse as parseQuerystring } from 'querystring';
-import { ScubaApi, AdminActions } from './api';
+import { ScubaApi, AdminActions, GetMetricsBatchBody } from './api';
 import { Configuration, ConfigurationParameters } from './configuration';
 
 export type MetricsClass = 'account' | 'bucket' | 'service';
@@ -51,6 +51,44 @@ export type HealthCheckResponse = {
 export type AdminResponseCseq = {
     sessionId: string;
     cseq: number;
+};
+
+export type ScubaHttpError = {
+    code: number;
+    description: string;
+};
+
+export type GetMetricsBatchResponseDateMetrics = {
+    date: string;
+    bytesTotal: number;
+    objectsTotal: number;
+};
+
+export type GetMetricsBatchResponseDateError = {
+    date: string;
+    error: ScubaHttpError;
+};
+
+export type GetMetricsBatchResponseDate = GetMetricsBatchResponseDateMetrics | GetMetricsBatchResponseDateError;
+
+export type GetMetricsBatchResponseResourceMetrics = {
+    metricsClass: MetricsClass;
+    resourceName: string;
+    metrics: GetMetricsBatchResponseDate[];
+};
+
+export type GetMetricsBatchResponseResourceError = {
+    metricsClass: MetricsClass;
+    resourceName: string;
+    error: ScubaHttpError;
+};
+
+export type GetMetricsBatchResponseResource =
+    | GetMetricsBatchResponseResourceMetrics
+    | GetMetricsBatchResponseResourceError;
+
+export type GetMetricsBatchResponse = {
+    metrics: GetMetricsBatchResponseResource[];
 };
 
 function lpad(num: number, digits: number) {
@@ -164,6 +202,18 @@ export default class ScubaClient {
         const day = lpad(date.getUTCDate(), 2);
         const dateString = `${year}-${month}-${day}`;
         const resp = (await this._api.getMetrics(metricsClass, resourceName, dateString, body, {
+            ...this._defaultReqOptions,
+            ...options,
+        })) as any;
+        return resp.data;
+    }
+
+    async getMetricsBatch(
+        metricsClass: MetricsClass,
+        body: GetMetricsBatchBody,
+        options?: AxiosRequestConfig,
+    ): Promise<GetMetricsBatchResponse> {
+        const resp = (await this._api.getMetricsBatch(metricsClass, body, {
             ...this._defaultReqOptions,
             ...options,
         })) as any;
