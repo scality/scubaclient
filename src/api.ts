@@ -233,6 +233,33 @@ export const ScubaApiAxiosParamCreator = function (configuration?: Configuration
                 options: localVarRequestOptions,
             };
         },
+        internalGetLatestAccountMetrics: async (
+            canonicalId: string,
+            options: AxiosRequestConfig = {},
+        ): Promise<RequestArgs> => {
+            assertParamExists('getAccountMetrics', 'canonicalId', canonicalId);
+
+            const localVarPath = `/_/internal/metrics/account/${canonicalId}/latest`;
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options };
+
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {
+                ...headersFromBaseOptions,
+                ...options.headers,
+            };
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     };
 };
 
@@ -317,6 +344,22 @@ export const ScubaApiFp = function (configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.admin(action, sessionId, body, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
+        /**
+         *
+         * @param {string} canonicalId
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async internalGetLatestAccountMetrics(
+            canonicalId: string,
+            options?: AxiosRequestConfig,
+        ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.internalGetLatestAccountMetrics(
+                canonicalId,
+                options,
+            );
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
     };
 };
 
@@ -370,6 +413,17 @@ export const ScubaApiFactory = function (configuration?: Configuration, basePath
          */
         admin(action: AdminActions, sessionId: string, body?: any, options?: any): AxiosPromise<void> {
             return localVarFp.admin(action, sessionId, body, options).then(request => request(axios, basePath));
+        },
+        /**
+         *
+         * @param {string} canonicalId
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        internalGetLatestAccountMetrics(canonicalId: string, options?: any): AxiosPromise<void> {
+            return localVarFp
+                .internalGetLatestAccountMetrics(canonicalId, options)
+                .then(request => request(axios, basePath));
         },
     };
 };
@@ -441,6 +495,18 @@ export class ScubaApi extends BaseAPI {
     public admin(action: AdminActions, sessionId: string, body?: any, options?: AxiosRequestConfig) {
         return ScubaApiFp(this.configuration)
             .admin(action, sessionId, body, options)
+            .then(request => request(this.axios, this.basePath));
+    }
+
+    /**
+     *
+     * @param {string} canonicalId
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    public internalGetLatestAccountMetrics(canonicalId: string, options?: AxiosRequestConfig) {
+        return ScubaApiFp(this.configuration)
+            .internalGetLatestAccountMetrics(canonicalId, options)
             .then(request => request(this.axios, this.basePath));
     }
 }
