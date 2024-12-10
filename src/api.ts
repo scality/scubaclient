@@ -173,6 +173,18 @@ export const ScubaApiAxiosParamCreator = function (configuration?: Configuration
         ): Promise<RequestArgs> => {
             // verify required parameter 'metricsClass' is not null or undefined
             assertParamExists('getMetricsBatch', 'metricsClass', metricsClass);
+            const { resourceNames } = body;
+            if (
+                resourceNames === null ||
+                resourceNames === undefined ||
+                !Array.isArray(resourceNames) ||
+                resourceNames.length == 0
+            ) {
+                throw new RequiredError(
+                    'resourceNames',
+                    'Body must a resourceNames array when calling getMetricsBatch.',
+                );
+            }
             const localVarPath = `/metrics/{metricsClass}`.replace(
                 `{${'metricsClass'}}`,
                 encodeURIComponent(String(metricsClass)),
