@@ -41,7 +41,7 @@ export type ScubaMetrics = {
     metricsClass: string;
     resourceName: string;
     id?: number;
-    date?: string;
+    date: string;
 };
 
 export type HealthCheckResponse = {
