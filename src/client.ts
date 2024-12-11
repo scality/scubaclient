@@ -237,4 +237,12 @@ export default class ScubaClient {
         })) as any;
         return resp.data;
     }
+
+    async internalGetLatestAccountMetrics(canonicalId: string, options?: AxiosRequestConfig): Promise<ScubaMetrics> {
+        const resp = (await this._api.internalGetLatestAccountMetrics(canonicalId, {
+            ...this._defaultReqOptions,
+            ...options,
+        })) as any;
+        return resp.data;
+    }
 }
