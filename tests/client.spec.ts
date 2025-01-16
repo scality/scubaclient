@@ -10,13 +10,17 @@ let response;
 class MockScubaServer {
     server: Server;
 
-    // Used to generate different metrics values for each APi
-    reqId: number;
-
     errorResponse: number | undefined;
+
+    mockResponse: any;
 
     constructor() {
         this.server = createServer(this.requestListener.bind(this));
+        this.mockResponse = null;
+    }
+
+    setMockResponse(response: any) {
+        this.mockResponse = response;
     }
 
     requestListener(req: IncomingMessage, res: ServerResponse) {
@@ -55,22 +59,20 @@ class MockScubaServer {
             });
 
             req.on('end', () => {
+                if (this.mockResponse) {
+                    return res.end(JSON.stringify(this.mockResponse));
+                }
+
                 const body = JSON.parse(bodyStr);
                 const urlSections = url?.split('/');
 
                 // getMetricsLatest and getMetrics
                 if (urlSections?.length === 5) {
-                    if (urlSections[4] === 'latest') {
-                        this.reqId = 1;
-                    } else {
-                        this.reqId = 2;
-                    }
-
                     response = <ScubaMetrics>{
                         metricsClass: urlSections[2],
                         resourceName: urlSections[3],
-                        objectsTotal: this.reqId,
-                        bytesTotal: 10 * this.reqId,
+                        objectsTotal: '100',
+                        bytesTotal: '1000',
                         date: '2024-12-06',
                     };
 
@@ -79,8 +81,6 @@ class MockScubaServer {
 
                 // getMetricsBatch
                 if (urlSections?.length === 3) {
-                    this.reqId = 3;
-
                     const { resourceNames } = body;
                     response = <GetMetricsBatchResponse>{
                         metrics: [
@@ -89,8 +89,8 @@ class MockScubaServer {
                                 resourceName: resourceNames[0],
                                 metrics: [
                                     {
-                                        objectsTotal: this.reqId,
-                                        bytesTotal: 10 * this.reqId,
+                                        objectsTotal: '100',
+                                        bytesTotal: '1000',
                                         date: '2024-12-06',
                                     },
                                 ],
@@ -141,28 +141,45 @@ describe('Test client', () => {
 
     beforeEach(async () => {
         scubaClient = new ScubaClient({ port });
+        mockServer.setMockResponse(null);
     });
 
     afterAll(async () => {
-        mockServer.close();
+        await mockServer.close();
     });
 
     describe('Test getLatestMetrics', () => {
         it('should return a successful response received by scuba', async () => {
-            const response = {
+            const expectedResponse = {
                 metricsClass,
                 resourceName,
-                objectsTotal: 1,
-                bytesTotal: 10,
+                objectsTotal: '100',
+                bytesTotal: '1000',
                 date: '2024-12-06',
             };
 
-            await expect(scubaClient.getLatestMetrics('bucket', 'test-bucket')).resolves.toStrictEqual(response);
+            await expect(scubaClient.getLatestMetrics('bucket', 'test-bucket')).resolves.toStrictEqual(
+                expectedResponse,
+            );
+        });
+
+        it('should handle responses with large numbers', async () => {
+            const largeNumberResponse = {
+                metricsClass,
+                resourceName,
+                objectsTotal: '9007199254740992',
+                bytesTotal: '90071992547409920',
+                date: '2024-12-06',
+            };
+
+            mockServer.setMockResponse(largeNumberResponse);
+            await expect(scubaClient.getLatestMetrics('bucket', 'test-bucket')).resolves.toStrictEqual(
+                largeNumberResponse,
+            );
         });
 
         it('should throw when receiving an error response from scuba', async () => {
             let errorCode = 500;
-
             mockServer.setErrorResponse(errorCode);
             await expect(scubaClient.getLatestMetrics('bucket', 'test-bucket')).rejects.toThrowError(AxiosError);
 
@@ -176,17 +193,34 @@ describe('Test client', () => {
         });
     });
 
-    describe('Test geMetrics', () => {
+    describe('Test getMetrics', () => {
         it('should return a successful response received by scuba', async () => {
-            const response = {
+            const expectedResponse = {
                 metricsClass,
                 resourceName,
-                objectsTotal: 2,
-                bytesTotal: 20,
+                objectsTotal: '100',
+                bytesTotal: '1000',
                 date: '2024-12-06',
             };
 
-            await expect(scubaClient.getMetrics('bucket', 'test-bucket', new Date())).resolves.toStrictEqual(response);
+            await expect(scubaClient.getMetrics('bucket', 'test-bucket', new Date())).resolves.toStrictEqual(
+                expectedResponse,
+            );
+        });
+
+        it('should handle responses with large numbers', async () => {
+            const largeNumberResponse = {
+                metricsClass,
+                resourceName,
+                objectsTotal: '9007199254740992',
+                bytesTotal: '90071992547409920',
+                date: '2024-12-06',
+            };
+
+            mockServer.setMockResponse(largeNumberResponse);
+            await expect(scubaClient.getMetrics('bucket', 'test-bucket', new Date())).resolves.toStrictEqual(
+                largeNumberResponse,
+            );
         });
 
         it('should throw when receiving an error response from scuba', async () => {
@@ -204,19 +238,17 @@ describe('Test client', () => {
         });
     });
 
-    describe('Test geMetricsBatch', () => {
+    describe('Test getMetricsBatch', () => {
         it('should return a successful response received by scuba', async () => {
-            const metricsClass = 'bucket';
-            const resourceName = 'test-bucket';
-            const response = {
+            const expectedResponse = {
                 metrics: [
                     {
                         metricsClass,
                         resourceName,
                         metrics: [
                             {
-                                objectsTotal: 3,
-                                bytesTotal: 30,
+                                objectsTotal: '100',
+                                bytesTotal: '1000',
                                 date: '2024-12-06',
                             },
                         ],
@@ -226,7 +258,30 @@ describe('Test client', () => {
 
             await expect(
                 scubaClient.getMetricsBatch('bucket', <GetMetricsBatchBody>{ resourceNames: ['test-bucket'] }),
-            ).resolves.toStrictEqual(response);
+            ).resolves.toStrictEqual(expectedResponse);
+        });
+
+        it('should handle responses with large numbers', async () => {
+            const largeNumberResponse = {
+                metrics: [
+                    {
+                        metricsClass,
+                        resourceName,
+                        metrics: [
+                            {
+                                objectsTotal: '9007199254740992', // Number.MAX_SAFE_INTEGER + 1
+                                bytesTotal: '90071992547409920',
+                                date: '2024-12-06',
+                            },
+                        ],
+                    },
+                ],
+            };
+
+            mockServer.setMockResponse(largeNumberResponse);
+            await expect(
+                scubaClient.getMetricsBatch('bucket', <GetMetricsBatchBody>{ resourceNames: ['test-bucket'] }),
+            ).resolves.toStrictEqual(largeNumberResponse);
         });
 
         it('should throw when receiving an error response from scuba', async () => {
