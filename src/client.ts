@@ -36,8 +36,8 @@ export type ScubaClientParameters = Omit<
 };
 
 export type ScubaMetrics = {
-    objectsTotal: number;
-    bytesTotal: number;
+    objectsTotal: string;
+    bytesTotal: string;
     metricsClass: string;
     resourceName: string;
     id?: number;
@@ -60,8 +60,8 @@ export type ScubaHttpError = {
 
 export type GetMetricsBatchResponseDateMetrics = {
     date: string;
-    bytesTotal: number;
-    objectsTotal: number;
+    bytesTotal: string;
+    objectsTotal: string;
 };
 
 export type GetMetricsBatchResponseDateError = {
