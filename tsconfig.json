@@ -2,7 +2,7 @@
     "compilerOptions": {
         "outDir": "./lib",
         "allowJs": false,
-        "target": "es2016",
+        "target": "es2020",
         "alwaysStrict": true,
         "skipLibCheck": false,
         "module": "commonjs",

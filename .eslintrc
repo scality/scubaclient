@@ -12,6 +12,7 @@
         "no-underscore-dangle": "off"
     },
     "parserOptions": {
-        "tsconfigRootDir": "."
+        "tsconfigRootDir": ".",
+        "ecmaVersion": 2020
     }
 }
