@@ -35,6 +35,17 @@ export type ScubaClientParameters = Omit<
     auth?: ScubaAuth;
 };
 
+// API response types (with strings)
+export type ScubaReturnedMetrics = {
+    objectsTotal: string;
+    bytesTotal: string;
+    metricsClass: string;
+    resourceName: string;
+    id?: number;
+    date: string;
+};
+
+// Client response types (with bigints)
 export type ScubaMetrics = {
     objectsTotal: bigint;
     bytesTotal: bigint;
@@ -58,6 +69,14 @@ export type ScubaHttpError = {
     description: string;
 };
 
+// API response types (with strings)
+export type GetMetricsBatchScubaResponseDateMetrics = {
+    date: string;
+    bytesTotal: string;
+    objectsTotal: string;
+};
+
+// Client response types (with bigints)
 export type GetMetricsBatchResponseDateMetrics = {
     date: string;
     bytesTotal: bigint;
@@ -69,7 +88,17 @@ export type GetMetricsBatchResponseDateError = {
     error: ScubaHttpError;
 };
 
+export type GetMetricsBatchScubaResponseDate =
+    | GetMetricsBatchScubaResponseDateMetrics
+    | GetMetricsBatchResponseDateError;
+
 export type GetMetricsBatchResponseDate = GetMetricsBatchResponseDateMetrics | GetMetricsBatchResponseDateError;
+
+export type GetMetricsBatchScubaResponseResourceMetrics = {
+    metricsClass: MetricsClass;
+    resourceName: string;
+    metrics: GetMetricsBatchScubaResponseDate[];
+};
 
 export type GetMetricsBatchResponseResourceMetrics = {
     metricsClass: MetricsClass;
@@ -206,10 +235,12 @@ export default class ScubaClient {
         const resp = (await this._api.getMetrics(metricsClass, resourceName, dateString, body, {
             ...this._defaultReqOptions,
             ...options,
-        })) as unknown as { data: ScubaMetrics };
-        resp.data.bytesTotal = BigInt(resp.data.bytesTotal || 0);
-        resp.data.objectsTotal = BigInt(resp.data.objectsTotal || 0);
-        return resp.data;
+        })) as unknown as { data: ScubaReturnedMetrics };
+        return {
+            ...resp.data,
+            bytesTotal: BigInt(resp.data.bytesTotal || 0),
+            objectsTotal: BigInt(resp.data.objectsTotal || 0),
+        };
     }
 
     async getMetricsBatch(
@@ -220,22 +251,34 @@ export default class ScubaClient {
         const resp = (await this._api.getMetricsBatch(metricsClass, body, {
             ...this._defaultReqOptions,
             ...options,
-        })) as unknown as { data: GetMetricsBatchResponse };
-        resp.data.metrics.forEach(resource => {
-            if ('error' in resource) {
-                return;
-            }
-            resource.metrics?.forEach(metric => {
-                if ('error' in metric) {
-                    return;
+        })) as unknown as {
+            data: {
+                metrics: (GetMetricsBatchScubaResponseResourceMetrics | GetMetricsBatchResponseResourceError)[];
+            };
+        };
+
+        return {
+            metrics: resp.data.metrics.map(resource => {
+                if ('error' in resource) {
+                    return resource as GetMetricsBatchResponseResourceError;
                 }
-                // eslint-disable-next-line no-param-reassign
-                metric.bytesTotal = BigInt(metric.bytesTotal || 0);
-                // eslint-disable-next-line no-param-reassign
-                metric.objectsTotal = BigInt(metric.objectsTotal || 0);
-            });
-        });
-        return resp.data;
+                return {
+                    metricsClass: resource.metricsClass,
+                    resourceName: resource.resourceName,
+                    metrics: (resource as GetMetricsBatchScubaResponseResourceMetrics).metrics.map(metric => {
+                        if ('error' in metric) {
+                            return metric as GetMetricsBatchResponseDateError;
+                        }
+                        const scubaMetric = metric as GetMetricsBatchScubaResponseDateMetrics;
+                        return {
+                            date: scubaMetric.date,
+                            bytesTotal: BigInt(scubaMetric.bytesTotal || '0'),
+                            objectsTotal: BigInt(scubaMetric.objectsTotal || '0'),
+                        };
+                    }),
+                };
+            }),
+        };
     }
 
     async healthCheck(options?: AxiosRequestConfig): Promise<HealthCheckResponse> {
@@ -260,9 +303,11 @@ export default class ScubaClient {
         const resp = (await this._api.internalGetLatestAccountMetrics(canonicalId, {
             ...this._defaultReqOptions,
             ...options,
-        })) as unknown as { data: ScubaMetrics };
-        resp.data.bytesTotal = BigInt(resp.data.bytesTotal || 0);
-        resp.data.objectsTotal = BigInt(resp.data.objectsTotal || 0);
-        return resp.data;
+        })) as unknown as { data: ScubaReturnedMetrics };
+        return {
+            ...resp.data,
+            bytesTotal: BigInt(resp.data.bytesTotal || 0),
+            objectsTotal: BigInt(resp.data.objectsTotal || 0),
+        };
     }
 }
