@@ -6,6 +6,13 @@ import ScubaClient, { GetMetricsBatchResponse, ScubaMetrics, AdminResponseCseq }
 import { AdminActions, GetMetricsBatchBody } from '../src/api';
 import { RequiredError } from '../src/base';
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
+// @ts-ignore we extend the prototype for testing purposes
+// eslint-disable-next-line no-extend-native
+BigInt.prototype.toJSON = function toJSON() {
+    return this.toString();
+};
+
 let response;
 class MockScubaServer {
     server: Server;
@@ -71,8 +78,8 @@ class MockScubaServer {
                     response = <ScubaMetrics>{
                         metricsClass: urlSections[2],
                         resourceName: urlSections[3],
-                        objectsTotal: '100',
-                        bytesTotal: '1000',
+                        objectsTotal: 100n,
+                        bytesTotal: 1000n,
                         date: '2024-12-06',
                     };
 
@@ -89,8 +96,8 @@ class MockScubaServer {
                                 resourceName: resourceNames[0],
                                 metrics: [
                                     {
-                                        objectsTotal: '100',
-                                        bytesTotal: '1000',
+                                        objectsTotal: 100n,
+                                        bytesTotal: 1000n,
                                         date: '2024-12-06',
                                     },
                                 ],
@@ -150,11 +157,11 @@ describe('Test client', () => {
 
     describe('Test getLatestMetrics', () => {
         it('should return a successful response received by scuba', async () => {
-            const expectedResponse = {
+            const expectedResponse = <ScubaMetrics>{
                 metricsClass,
                 resourceName,
-                objectsTotal: '100',
-                bytesTotal: '1000',
+                objectsTotal: 100n,
+                bytesTotal: 1000n,
                 date: '2024-12-06',
             };
 
@@ -164,11 +171,11 @@ describe('Test client', () => {
         });
 
         it('should handle responses with large numbers', async () => {
-            const largeNumberResponse = {
+            const largeNumberResponse = <ScubaMetrics>{
                 metricsClass,
                 resourceName,
-                objectsTotal: '9007199254740992',
-                bytesTotal: '90071992547409920',
+                objectsTotal: 9007199254740992n,
+                bytesTotal: 90071992547409920n,
                 date: '2024-12-06',
             };
 
@@ -195,11 +202,11 @@ describe('Test client', () => {
 
     describe('Test getMetrics', () => {
         it('should return a successful response received by scuba', async () => {
-            const expectedResponse = {
+            const expectedResponse = <ScubaMetrics>{
                 metricsClass,
                 resourceName,
-                objectsTotal: '100',
-                bytesTotal: '1000',
+                objectsTotal: 100n,
+                bytesTotal: 1000n,
                 date: '2024-12-06',
             };
 
@@ -209,11 +216,11 @@ describe('Test client', () => {
         });
 
         it('should handle responses with large numbers', async () => {
-            const largeNumberResponse = {
+            const largeNumberResponse = <ScubaMetrics>{
                 metricsClass,
                 resourceName,
-                objectsTotal: '9007199254740992',
-                bytesTotal: '90071992547409920',
+                objectsTotal: 9007199254740992n,
+                bytesTotal: 90071992547409920n,
                 date: '2024-12-06',
             };
 
@@ -240,15 +247,15 @@ describe('Test client', () => {
 
     describe('Test getMetricsBatch', () => {
         it('should return a successful response received by scuba', async () => {
-            const expectedResponse = {
+            const expectedResponse = <GetMetricsBatchResponse>{
                 metrics: [
                     {
                         metricsClass,
                         resourceName,
                         metrics: [
                             {
-                                objectsTotal: '100',
-                                bytesTotal: '1000',
+                                objectsTotal: 100n,
+                                bytesTotal: 1000n,
                                 date: '2024-12-06',
                             },
                         ],
@@ -262,15 +269,15 @@ describe('Test client', () => {
         });
 
         it('should handle responses with large numbers', async () => {
-            const largeNumberResponse = {
+            const largeNumberResponse = <GetMetricsBatchResponse>{
                 metrics: [
                     {
                         metricsClass,
                         resourceName,
                         metrics: [
                             {
-                                objectsTotal: '9007199254740992', // Number.MAX_SAFE_INTEGER + 1
-                                bytesTotal: '90071992547409920',
+                                objectsTotal: 9007199254740992n, // Number.MAX_SAFE_INTEGER + 1
+                                bytesTotal: 90071992547409920n,
                                 date: '2024-12-06',
                             },
                         ],

@@ -36,8 +36,8 @@ export type ScubaClientParameters = Omit<
 };
 
 export type ScubaMetrics = {
-    objectsTotal: string;
-    bytesTotal: string;
+    objectsTotal: bigint;
+    bytesTotal: bigint;
     metricsClass: string;
     resourceName: string;
     id?: number;
@@ -60,8 +60,8 @@ export type ScubaHttpError = {
 
 export type GetMetricsBatchResponseDateMetrics = {
     date: string;
-    bytesTotal: string;
-    objectsTotal: string;
+    bytesTotal: bigint;
+    objectsTotal: bigint;
 };
 
 export type GetMetricsBatchResponseDateError = {
@@ -186,7 +186,9 @@ export default class ScubaClient {
         const resp = (await this._api.getLatestMetrics(metricsClass, resourceName, body, {
             ...this._defaultReqOptions,
             ...options,
-        })) as any;
+        })) as unknown as { data: ScubaMetrics };
+        resp.data.bytesTotal = BigInt(resp.data.bytesTotal || 0);
+        resp.data.objectsTotal = BigInt(resp.data.objectsTotal || 0);
         return resp.data;
     }
 
@@ -204,7 +206,9 @@ export default class ScubaClient {
         const resp = (await this._api.getMetrics(metricsClass, resourceName, dateString, body, {
             ...this._defaultReqOptions,
             ...options,
-        })) as any;
+        })) as unknown as { data: ScubaMetrics };
+        resp.data.bytesTotal = BigInt(resp.data.bytesTotal || 0);
+        resp.data.objectsTotal = BigInt(resp.data.objectsTotal || 0);
         return resp.data;
     }
 
@@ -216,7 +220,21 @@ export default class ScubaClient {
         const resp = (await this._api.getMetricsBatch(metricsClass, body, {
             ...this._defaultReqOptions,
             ...options,
-        })) as any;
+        })) as unknown as { data: GetMetricsBatchResponse };
+        resp.data.metrics.forEach(resource => {
+            if ('error' in resource) {
+                return;
+            }
+            resource.metrics?.forEach(metric => {
+                if ('error' in metric) {
+                    return;
+                }
+                // eslint-disable-next-line no-param-reassign
+                metric.bytesTotal = BigInt(metric.bytesTotal || 0);
+                // eslint-disable-next-line no-param-reassign
+                metric.objectsTotal = BigInt(metric.objectsTotal || 0);
+            });
+        });
         return resp.data;
     }
 
@@ -242,7 +260,9 @@ export default class ScubaClient {
         const resp = (await this._api.internalGetLatestAccountMetrics(canonicalId, {
             ...this._defaultReqOptions,
             ...options,
-        })) as any;
+        })) as unknown as { data: ScubaMetrics };
+        resp.data.bytesTotal = BigInt(resp.data.bytesTotal || 0);
+        resp.data.objectsTotal = BigInt(resp.data.objectsTotal || 0);
         return resp.data;
     }
 }
