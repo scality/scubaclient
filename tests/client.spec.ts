@@ -6,13 +6,6 @@ import ScubaClient, { GetMetricsBatchResponse, ScubaMetrics, AdminResponseCseq }
 import { AdminActions, GetMetricsBatchBody } from '../src/api';
 import { RequiredError } from '../src/base';
 
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
-// @ts-ignore we extend the prototype for testing purposes
-// eslint-disable-next-line no-extend-native
-BigInt.prototype.toJSON = function toJSON() {
-    return this.toString();
-};
-
 let response;
 class MockScubaServer {
     server: Server;
@@ -83,7 +76,13 @@ class MockScubaServer {
                         date: '2024-12-06',
                     };
 
-                    res.end(JSON.stringify(response));
+                    res.end(
+                        JSON.stringify({
+                            ...response,
+                            objectsTotal: response.objectsTotal.toString(),
+                            bytesTotal: response.bytesTotal.toString(),
+                        }),
+                    );
                 }
 
                 // getMetricsBatch
@@ -105,7 +104,19 @@ class MockScubaServer {
                         ],
                     };
 
-                    return res.end(JSON.stringify(response));
+                    return res.end(
+                        JSON.stringify({
+                            ...response,
+                            metrics: response.metrics.map(metric => ({
+                                ...metric,
+                                metrics: metric.metrics.map(m => ({
+                                    ...m,
+                                    objectsTotal: m.objectsTotal.toString(),
+                                    bytesTotal: m.bytesTotal.toString(),
+                                })),
+                            })),
+                        }),
+                    );
                 }
 
                 return res.end();
@@ -179,7 +190,11 @@ describe('Test client', () => {
                 date: '2024-12-06',
             };
 
-            mockServer.setMockResponse(largeNumberResponse);
+            mockServer.setMockResponse({
+                ...largeNumberResponse,
+                objectsTotal: largeNumberResponse.objectsTotal.toString(),
+                bytesTotal: largeNumberResponse.bytesTotal.toString(),
+            });
             await expect(scubaClient.getLatestMetrics('bucket', 'test-bucket')).resolves.toStrictEqual(
                 largeNumberResponse,
             );
@@ -224,7 +239,11 @@ describe('Test client', () => {
                 date: '2024-12-06',
             };
 
-            mockServer.setMockResponse(largeNumberResponse);
+            mockServer.setMockResponse({
+                ...largeNumberResponse,
+                objectsTotal: largeNumberResponse.objectsTotal.toString(),
+                bytesTotal: largeNumberResponse.bytesTotal.toString(),
+            });
             await expect(scubaClient.getMetrics('bucket', 'test-bucket', new Date())).resolves.toStrictEqual(
                 largeNumberResponse,
             );
@@ -269,7 +288,7 @@ describe('Test client', () => {
         });
 
         it('should handle responses with large numbers', async () => {
-            const largeNumberResponse = <GetMetricsBatchResponse>{
+            const largeNumberResponse = {
                 metrics: [
                     {
                         metricsClass,
@@ -285,7 +304,17 @@ describe('Test client', () => {
                 ],
             };
 
-            mockServer.setMockResponse(largeNumberResponse);
+            mockServer.setMockResponse({
+                ...largeNumberResponse,
+                metrics: largeNumberResponse.metrics.map(metric => ({
+                    ...metric,
+                    metrics: metric.metrics.map(m => ({
+                        ...m,
+                        objectsTotal: m.objectsTotal.toString(),
+                        bytesTotal: m.bytesTotal.toString(),
+                    })),
+                })),
+            });
             await expect(
                 scubaClient.getMetricsBatch('bucket', <GetMetricsBatchBody>{ resourceNames: ['test-bucket'] }),
             ).resolves.toStrictEqual(largeNumberResponse);
