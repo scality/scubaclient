@@ -36,7 +36,7 @@ export type ScubaClientParameters = Omit<
 };
 
 // API response types (with strings)
-export type ScubaReturnedMetrics = {
+export type ScubaMetricsResponse = {
     objectsTotal: string;
     bytesTotal: string;
     metricsClass: string;
@@ -235,7 +235,7 @@ export default class ScubaClient {
         const resp = (await this._api.getMetrics(metricsClass, resourceName, dateString, body, {
             ...this._defaultReqOptions,
             ...options,
-        })) as unknown as { data: ScubaReturnedMetrics };
+        })) as unknown as { data: ScubaMetricsResponse };
         return {
             ...resp.data,
             bytesTotal: BigInt(resp.data.bytesTotal || 0),
@@ -260,7 +260,7 @@ export default class ScubaClient {
         return {
             metrics: resp.data.metrics.map(resource => {
                 if ('error' in resource) {
-                    return resource as GetMetricsBatchResponseResourceError;
+                    return resource;
                 }
                 return {
                     metricsClass: resource.metricsClass,
@@ -303,7 +303,7 @@ export default class ScubaClient {
         const resp = (await this._api.internalGetLatestAccountMetrics(canonicalId, {
             ...this._defaultReqOptions,
             ...options,
-        })) as unknown as { data: ScubaReturnedMetrics };
+        })) as unknown as { data: ScubaMetricsResponse };
         return {
             ...resp.data,
             bytesTotal: BigInt(resp.data.bytesTotal || 0),
