@@ -183,7 +183,7 @@ export default class ScubaClient {
         options?: AxiosRequestConfig,
         body?: any,
     ): Promise<ScubaMetrics> {
-        const resp = (await this._api.getLatestMetrics(metricsClass, resourceName, body, {
+        const resp = (await this._api.getLatestMetrics(metricsClass, resourceName, null, null, body, {
             ...this._defaultReqOptions,
             ...options,
         })) as any;
@@ -201,7 +201,7 @@ export default class ScubaClient {
         const month = lpad(date.getUTCMonth() + 1, 2);
         const day = lpad(date.getUTCDate(), 2);
         const dateString = `${year}-${month}-${day}`;
-        const resp = (await this._api.getMetrics(metricsClass, resourceName, dateString, body, {
+        const resp = (await this._api.getMetrics(metricsClass, resourceName, dateString, null, null, body, {
             ...this._defaultReqOptions,
             ...options,
         })) as any;
@@ -240,6 +240,49 @@ export default class ScubaClient {
 
     async internalGetLatestAccountMetrics(canonicalId: string, options?: AxiosRequestConfig): Promise<ScubaMetrics> {
         const resp = (await this._api.internalGetLatestAccountMetrics(canonicalId, {
+            ...this._defaultReqOptions,
+            ...options,
+        })) as any;
+        return resp.data;
+    }
+
+    async getSubMetrics(
+        metricsClass: MetricsClass,
+        resourceName: string,
+        date: Date,
+        subMetricType: string,
+        subMetricName: string,
+        options?: AxiosRequestConfig,
+        body?: any,
+    ): Promise<ScubaMetrics> {
+        const year = lpad(date.getUTCFullYear(), 4);
+        const month = lpad(date.getUTCMonth() + 1, 2);
+        const day = lpad(date.getUTCDate(), 2);
+        const dateString = `${year}-${month}-${day}`;
+        const resp = (await this._api.getMetrics(
+            metricsClass,
+            resourceName,
+            dateString,
+            subMetricType,
+            subMetricName,
+            body,
+            {
+                ...this._defaultReqOptions,
+                ...options,
+            },
+        )) as any;
+        return resp.data;
+    }
+
+    async getLatestSubMetrics(
+        metricsClass: MetricsClass,
+        resourceName: string,
+        subMetricType: string,
+        subMetricName: string,
+        options?: AxiosRequestConfig,
+        body?: any,
+    ): Promise<ScubaMetrics> {
+        const resp = (await this._api.getLatestMetrics(metricsClass, resourceName, subMetricType, subMetricName, body, {
             ...this._defaultReqOptions,
             ...options,
         })) as any;

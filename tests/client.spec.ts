@@ -101,6 +101,21 @@ class MockScubaServer {
                     return res.end(JSON.stringify(response));
                 }
 
+                // getLatestSubMetrics and getSubMetrics
+                if (urlSections?.length === 7) {
+                    this.reqId = 4;
+
+                    response = <ScubaMetrics>{
+                        metricsClass: urlSections[2],
+                        resourceName: urlSections[3],
+                        objectsTotal: this.reqId,
+                        bytesTotal: 10 * this.reqId,
+                        date: '2024-12-06',
+                    };
+
+                    res.end(JSON.stringify(response));
+                }
+
                 return res.end();
             });
         }
@@ -176,7 +191,42 @@ describe('Test client', () => {
         });
     });
 
-    describe('Test geMetrics', () => {
+    describe('Test getLatestSubMetrics', () => {
+        it('should return a successful response received by scuba', async () => {
+            const response = {
+                metricsClass,
+                resourceName,
+                objectsTotal: 4,
+                bytesTotal: 40,
+                date: '2024-12-06',
+            };
+
+            await expect(
+                scubaClient.getLatestSubMetrics('bucket', 'test-bucket', 'location', 'location1'),
+            ).resolves.toStrictEqual(response);
+        });
+
+        it('should throw when receiving an error response from scuba', async () => {
+            let errorCode = 500;
+
+            mockServer.setErrorResponse(errorCode);
+            await expect(
+                scubaClient.getLatestSubMetrics('bucket', 'test-bucket', 'location', 'location1'),
+            ).rejects.toThrowError(AxiosError);
+
+            errorCode = 403;
+            mockServer.setErrorResponse(errorCode);
+            await expect(
+                scubaClient.getLatestSubMetrics('bucket', 'test-bucket', 'location', 'location1'),
+            ).rejects.toMatchObject({
+                response: {
+                    status: errorCode,
+                },
+            });
+        });
+    });
+
+    describe('Test getMetrics', () => {
         it('should return a successful response received by scuba', async () => {
             const response = {
                 metricsClass,
@@ -197,6 +247,40 @@ describe('Test client', () => {
             errorCode = 403;
             mockServer.setErrorResponse(errorCode);
             await expect(scubaClient.getMetrics('bucket', 'test-bucket', new Date())).rejects.toMatchObject({
+                response: {
+                    status: errorCode,
+                },
+            });
+        });
+    });
+
+    describe('Test getSubMetrics', () => {
+        it('should return a successful response received by scuba', async () => {
+            const response = {
+                metricsClass,
+                resourceName,
+                objectsTotal: 4,
+                bytesTotal: 40,
+                date: '2024-12-06',
+            };
+
+            await expect(
+                scubaClient.getSubMetrics('bucket', 'test-bucket', new Date(), 'location', 'location1'),
+            ).resolves.toStrictEqual(response);
+        });
+
+        it('should throw when receiving an error response from scuba', async () => {
+            let errorCode = 500;
+            mockServer.setErrorResponse(errorCode);
+            await expect(
+                scubaClient.getSubMetrics('bucket', 'test-bucket', new Date(), 'location', 'location1'),
+            ).rejects.toThrowError(AxiosError);
+
+            errorCode = 403;
+            mockServer.setErrorResponse(errorCode);
+            await expect(
+                scubaClient.getSubMetrics('bucket', 'test-bucket', new Date(), 'location', 'location1'),
+            ).rejects.toMatchObject({
                 response: {
                     status: errorCode,
                 },
