@@ -9,7 +9,7 @@ import { parse as parseQuerystring } from 'querystring';
 import { ScubaApi, AdminActions, GetMetricsBatchBody } from './api';
 import { Configuration, ConfigurationParameters } from './configuration';
 
-export type MetricsClass = 'account' | 'bucket' | 'service';
+export type MetricsClass = 'account' | 'bucket' | 'service' | 'location';
 
 type WithOptional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
