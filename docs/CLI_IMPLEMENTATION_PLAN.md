@@ -1,11 +1,13 @@
 # CLI Implementation Plan for Scuba API
 
 ## Overview
+
 Create a command-line interface for the Scuba API that wraps the existing ScubaClient SDK functionality in a separate CLI folder.
 
 ## Proposed CLI Structure
 
 ### Main Commands
+
 ```bash
 scuba [command] [subcommand] [options]
 
@@ -15,8 +17,8 @@ scuba metrics get-latest --class <account|bucket|service|location> --resource <n
 scuba metrics batch --class <account|bucket|service|location> --resources <name1,name2> [--dates date1,date2]
 
 # Sub-metrics commands  
-scuba submetrics get --class <class> --resource <name> --type <type> --name <name> [--date YYYY-MM-DD]
-scuba submetrics get-latest --class <class> --resource <name> --type <type> --name <name>
+scuba submetrics get --class <class> --resource <name> --type <subtype> --name <name> [--date YYYY-MM-DD]
+scuba submetrics get-latest --class <class> --resource <name> --type <subtype> --name <name>
 
 # Health check
 scuba health
@@ -25,6 +27,7 @@ scuba health
 scuba admin start-ingest --session-id <id>
 scuba admin stop-ingest --session-id <id>
 scuba admin read-raft --session-id <id>
+scuba admin read-raft-cseq --session-id <id>
 scuba admin trigger-repair --session-id <id>
 
 # Internal commands
@@ -34,11 +37,13 @@ scuba internal account-metrics --canonical-id <id>
 ## Implementation Tasks
 
 ### 1. Setup CLI Framework in Separate Folder
+
 - Create separate `cli/` directory at root level (parallel to `src/`)
-- Add dependencies: `commander` for CLI parsing, `chalk` for colored output
+- Add dependencies: `commander` for CLI parsing
 - CLI will import and use the existing `src/` SDK as a dependency
 
 ### 2. Core CLI Infrastructure
+
 - **Connection management**: Support configuration via:
   - CLI flags: `--host`, `--port`, `--https`, `--cert`, `--key`, `--ca`
   - Environment variables: `SCUBA_HOST`, `SCUBA_PORT`, `SCUBA_HTTPS`, `SCUBA_CERT`, `SCUBA_KEY`, `SCUBA_CA`
@@ -51,28 +56,33 @@ scuba internal account-metrics --canonical-id <id>
 - **Configuration precedence**: CLI flags > env vars > config file > defaults
 
 ### 3. Command Implementation
+
 - **Metrics commands**: Implement get, get-latest, batch operations
 - **Sub-metrics commands**: Handle sub-metric specific operations  
-- **Health command**: Simple health check with colored status output
+- **Health command**: Simple health check with status output
 - **Admin commands**: Protected admin operations with confirmation prompts
 
 ### 4. Output Formatting
+
 - **JSON output**: `--json` flag for machine-readable output
 - **Table output**: Default human-readable table format using `cli-table3`
 - **Raw output**: `--raw` flag for minimal output
 
 ### 5. Environment Variables Support
+
 - **Connection**: `SCUBA_HOST`, `SCUBA_PORT`, `SCUBA_HTTPS`, `SCUBA_CERT`, `SCUBA_KEY`, `SCUBA_CA`, `SCUBA_KEEP_ALIVE`
 - **Authentication**: `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`, `REGION`
 - **Behavior**: `SCUBA_OUTPUT_FORMAT` (json|table|raw)
 
 ### 6. Build & Distribution
+
 - Update `package.json` with `bin` field pointing to CLI executable
 - Add TypeScript compilation for CLI components
 - Create separate `tsconfig.json` for CLI if needed
 - Update build scripts to include CLI in distribution
 
 ## File Structure
+
 ```
 cli/                       # Separate CLI folder
 ├── package.json           # CLI-specific dependencies
@@ -91,9 +101,10 @@ cli/                       # Separate CLI folder
 │   │   ├── output.ts      # Output formatting
 │   │   └── errors.ts      # Error handling
 │   └── types.ts           # CLI-specific types
-├── bin/
-│   └── scuba              # CLI executable script
 └── README.md              # CLI documentation
+
+bin/                       # CLI executable (root level)
+└── scuba                  # CLI executable script
 
 src/                       # Existing SDK (unchanged)
 ├── client.ts
@@ -102,6 +113,7 @@ src/                       # Existing SDK (unchanged)
 ```
 
 ## Configuration Example
+
 ```json
 // ~/.scuba/config.json
 {
@@ -126,18 +138,21 @@ src/                       # Existing SDK (unchanged)
 ## Detailed Implementation Steps
 
 ### Phase 1: Project Setup
+
 1. Create `cli/` directory structure
 2. Initialize CLI-specific `package.json` with dependencies
 3. Set up TypeScript configuration for CLI
 4. Create basic CLI entry point with commander.js
 
 ### Phase 2: Core Infrastructure
+
 1. Implement configuration management (`utils/config.ts`)
 2. Set up authentication helpers (`utils/auth.ts`)
 3. Create output formatting utilities (`utils/output.ts`)
 4. Implement error handling (`utils/errors.ts`)
 
 ### Phase 3: Command Implementation
+
 1. Implement metrics commands (`commands/metrics.ts`)
 2. Implement sub-metrics commands (`commands/submetrics.ts`)
 3. Implement health check command (`commands/health.ts`)
@@ -145,12 +160,14 @@ src/                       # Existing SDK (unchanged)
 5. Implement internal commands (`commands/internal.ts`)
 
 ### Phase 4: Integration & Testing
+
 1. Update root `package.json` for CLI distribution
 2. Create executable script (`bin/scuba`)
 3. Test CLI commands against mock/real Scuba service
 4. Write CLI documentation
 
 ### Phase 5: Advanced Features
+
 1. Add shell completion support
 2. Implement config file profiles
 3. Add verbose/debug logging options
@@ -159,6 +176,7 @@ src/                       # Existing SDK (unchanged)
 ## CLI Flag Specifications
 
 ### Global Flags
+
 - `--host <host>` - Scuba service host (env: `SCUBA_HOST`)
 - `--port <port>` - Scuba service port (env: `SCUBA_PORT`)
 - `--https` - Use HTTPS connection (env: `SCUBA_HTTPS`)
@@ -176,12 +194,13 @@ src/                       # Existing SDK (unchanged)
 - `--version, -V` - Show version
 
 ### Command-Specific Flags
+
 - `--class <type>` - Metrics class (account|bucket|service|location)
 - `--resource <name>` - Resource name
 - `--date <YYYY-MM-DD>` - Specific date for metrics
 - `--resources <names>` - Comma-separated resource names for batch
 - `--dates <dates>` - Comma-separated dates for batch
-- `--type <type>` - Sub-metric type
+- `--type <subtype>` - Sub-metric type
 - `--name <name>` - Sub-metric name
 - `--session-id <id>` - Admin session ID
 - `--canonical-id <id>` - Account canonical ID
@@ -338,7 +357,6 @@ export function loadConfig(profile = 'default', cliOptions: any = {}): ScubaClie
 
 ```typescript
 import Table from 'cli-table3';
-import chalk from 'chalk';
 import { ScubaMetrics } from '../../../src/client';
 
 export interface OutputOptions {
@@ -359,7 +377,7 @@ export function formatMetricsOutput(metrics: ScubaMetrics | ScubaMetrics[], opti
 
   // Table format (default)
   const table = new Table({
-    head: ['Resource', 'Class', 'Date', 'Bytes Total', 'Objects Total'].map(h => chalk.cyan(h)),
+    head: ['Resource', 'Class', 'Date', 'Bytes Total', 'Objects Total'],
     colWidths: [20, 15, 12, 15, 15]
   });
 
@@ -388,12 +406,12 @@ export function formatHealthOutput(health: any, options: OutputOptions): string 
   }
 
   return health.date 
-    ? chalk.green(`✓ Scuba service is healthy (${health.date})`)
-    : chalk.green('✓ Scuba service is healthy');
+    ? `✓ Scuba service is healthy (${health.date})`
+    : '✓ Scuba service is healthy';
 }
 
 function formatBytes(bytes: number): string {
-  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const sizes = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
   if (bytes === 0) return '0 B';
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
   return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
@@ -403,26 +421,25 @@ function formatBytes(bytes: number): string {
 ### 4. Error Handling (`cli/src/utils/errors.ts`)
 
 ```typescript
-import chalk from 'chalk';
 import { AxiosError } from 'axios';
 
 export function handleError(error: any): never {
   if (error.isAxiosError) {
     const axiosError = error as AxiosError;
     if (axiosError.response) {
-      console.error(chalk.red(`HTTP ${axiosError.response.status}: ${axiosError.response.statusText}`));
+      console.error(`HTTP ${axiosError.response.status}: ${axiosError.response.statusText}`);
       if (axiosError.response.data) {
-        console.error(chalk.red(JSON.stringify(axiosError.response.data, null, 2)));
+        console.error(JSON.stringify(axiosError.response.data, null, 2));
       }
     } else if (axiosError.request) {
-      console.error(chalk.red('Network error: Unable to connect to Scuba service'));
+      console.error('Network error: Unable to connect to Scuba service');
     } else {
-      console.error(chalk.red(`Request error: ${axiosError.message}`));
+      console.error(`Request error: ${axiosError.message}`);
     }
   } else if (error instanceof Error) {
-    console.error(chalk.red(`Error: ${error.message}`));
+    console.error(`Error: ${error.message}`);
   } else {
-    console.error(chalk.red(`Unknown error: ${error}`));
+    console.error(`Unknown error: ${error}`);
   }
   
   process.exit(1);
@@ -571,7 +588,6 @@ export function setupMetricsCommands(program: Command): void {
   },
   "dependencies": {
     "commander": "^9.4.1",
-    "chalk": "^4.1.2",
     "cli-table3": "^0.6.3"
   },
   "devDependencies": {
@@ -585,11 +601,11 @@ export function setupMetricsCommands(program: Command): void {
 }
 ```
 
-### 7. Executable Script (`cli/bin/scuba`)
+### 7. Executable Script (`bin/scuba`)
 
 ```bash
 #!/usr/bin/env node
-require('../lib/index.js');
+require('./cli/lib/index.js');
 ```
 
 ### 8. TypeScript Configuration (`cli/tsconfig.json`)
