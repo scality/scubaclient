@@ -4,7 +4,6 @@ import * as https from 'https';
 import { SignatureV4 } from '@smithy/signature-v4';
 import globalAxios, { AxiosRequestConfig, AxiosInstance, AxiosHeaders } from 'axios';
 import { Sha256 } from '@aws-crypto/sha256-js';
-import { URL } from 'url';
 import { parse as parseQuerystring } from 'querystring';
 import { ScubaApi, AdminActions, GetMetricsBatchBody } from './api';
 import { Configuration, ConfigurationParameters } from './configuration';
