@@ -21,7 +21,7 @@
     "@babel/preset-typescript": "^7.27.1",
     "@openapitools/openapi-generator-cli": "^2.23.1",
     "@types/jest": "^29.2.3",
-    "@types/node": "^18.19.121",
+    "@types/node": "^24.4.0",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.62.0",
     "babel-jest": "^29.3.1",
