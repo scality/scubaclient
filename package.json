@@ -16,10 +16,10 @@
     "test": "NODE_OPTIONS=\"--experimental-vm-modules\" jest tests --verbose"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.4",
-    "@babel/preset-env": "^7.28.3",
-    "@babel/preset-typescript": "^7.27.1",
-    "@openapitools/openapi-generator-cli": "^2.24.0",
+    "@babel/core": "^7.28.5",
+    "@babel/preset-env": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@openapitools/openapi-generator-cli": "^2.27.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.6.1",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
@@ -32,14 +32,14 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jest": "27",
     "jest": "^30.2.0",
-    "prettier": "^3.6.2",
-    "ts-jest": "^29.4.4",
+    "prettier": "^3.7.4",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@aws-crypto/sha256-js": "^5.2.0",
-    "@smithy/signature-v4": "^5.3.0",
-    "axios": "^1.12.2"
+    "@smithy/signature-v4": "^5.3.7",
+    "axios": "^1.13.2"
   },
   "engines": {
     "node": ">= 16"
