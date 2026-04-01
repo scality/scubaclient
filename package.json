@@ -16,30 +16,30 @@
     "test": "NODE_OPTIONS=\"--experimental-vm-modules\" jest tests --verbose"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.5",
-    "@babel/preset-env": "^7.28.5",
+    "@babel/core": "^7.29.0",
+    "@babel/preset-env": "^7.29.2",
     "@babel/preset-typescript": "^7.28.5",
-    "@openapitools/openapi-generator-cli": "^2.27.0",
+    "@openapitools/openapi-generator-cli": "^2.31.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^24.6.1",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
-    "babel-jest": "^30.2.0",
+    "babel-jest": "^30.3.0",
     "eslint": "^8.28.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-config-scality": "git+https://github.com/scality/Guidelines#8.3.0",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jest": "27",
-    "jest": "^30.2.0",
-    "prettier": "^3.7.4",
+    "jest": "^30.3.0",
+    "prettier": "^3.8.1",
     "ts-jest": "^29.4.6",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@aws-crypto/sha256-js": "^5.2.0",
-    "@smithy/signature-v4": "^5.3.7",
-    "axios": "^1.13.2"
+    "@smithy/signature-v4": "^5.3.12",
+    "axios": "^1.14.0"
   },
   "engines": {
     "node": ">= 16"
