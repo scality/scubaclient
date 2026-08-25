@@ -381,8 +381,10 @@ describe('Test client', () => {
         });
 
         it('should throw ECONNREFUSED when not able to connect to the server', async () => {
-            mockServer.close();
-            await expect(scubaClient.healthCheck()).rejects.toThrow('ECONNREFUSED');
+            await mockServer.close();
+            // When localhost resolves to both ::1 and 127.0.0.1, node reports the failed
+            // connection as an AggregateError with an empty message, so match on the code.
+            await expect(scubaClient.healthCheck()).rejects.toMatchObject({ code: 'ECONNREFUSED' });
         });
     });
 });
