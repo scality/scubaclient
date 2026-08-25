@@ -159,7 +159,7 @@ describe('Test client', () => {
     });
 
     afterAll(async () => {
-        mockServer.close();
+        await mockServer.close();
     });
 
     describe('Test getLatestMetrics', () => {
