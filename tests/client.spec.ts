@@ -159,7 +159,7 @@ describe('Test client', () => {
     });
 
     afterAll(async () => {
-        mockServer.close();
+        await mockServer.close();
     });
 
     describe('Test getLatestMetrics', () => {
@@ -179,7 +179,7 @@ describe('Test client', () => {
             let errorCode = 500;
 
             mockServer.setErrorResponse(errorCode);
-            await expect(scubaClient.getLatestMetrics('bucket', 'test-bucket')).rejects.toThrowError(AxiosError);
+            await expect(scubaClient.getLatestMetrics('bucket', 'test-bucket')).rejects.toThrow(AxiosError);
 
             errorCode = 403;
             mockServer.setErrorResponse(errorCode);
@@ -212,7 +212,7 @@ describe('Test client', () => {
             mockServer.setErrorResponse(errorCode);
             await expect(
                 scubaClient.getLatestSubMetrics('bucket', 'test-bucket', 'location', 'location1'),
-            ).rejects.toThrowError(AxiosError);
+            ).rejects.toThrow(AxiosError);
 
             errorCode = 403;
             mockServer.setErrorResponse(errorCode);
@@ -242,7 +242,7 @@ describe('Test client', () => {
         it('should throw when receiving an error response from scuba', async () => {
             let errorCode = 500;
             mockServer.setErrorResponse(errorCode);
-            await expect(scubaClient.getMetrics('bucket', 'test-bucket', new Date())).rejects.toThrowError(AxiosError);
+            await expect(scubaClient.getMetrics('bucket', 'test-bucket', new Date())).rejects.toThrow(AxiosError);
 
             errorCode = 403;
             mockServer.setErrorResponse(errorCode);
@@ -274,7 +274,7 @@ describe('Test client', () => {
             mockServer.setErrorResponse(errorCode);
             await expect(
                 scubaClient.getSubMetrics('bucket', 'test-bucket', new Date(), 'location', 'location1'),
-            ).rejects.toThrowError(AxiosError);
+            ).rejects.toThrow(AxiosError);
 
             errorCode = 403;
             mockServer.setErrorResponse(errorCode);
@@ -318,7 +318,7 @@ describe('Test client', () => {
             mockServer.setErrorResponse(errorCode);
             await expect(
                 scubaClient.getMetricsBatch('bucket', <GetMetricsBatchBody>{ resourceNames: ['test-bucket'] }),
-            ).rejects.toThrowError(AxiosError);
+            ).rejects.toThrow(AxiosError);
 
             errorCode = 403;
             mockServer.setErrorResponse(errorCode);
@@ -332,9 +332,7 @@ describe('Test client', () => {
         });
 
         it('should throw when the body does not include the resourceNames field', async () => {
-            await expect(scubaClient.getMetricsBatch('bucket', <GetMetricsBatchBody>{})).rejects.toThrowError(
-                RequiredError,
-            );
+            await expect(scubaClient.getMetricsBatch('bucket', <GetMetricsBatchBody>{})).rejects.toThrow(RequiredError);
         });
     });
 
@@ -351,7 +349,7 @@ describe('Test client', () => {
         it('should throw when receiving an error response from scuba', async () => {
             let errorCode = 500;
             mockServer.setErrorResponse(errorCode);
-            await expect(scubaClient.admin(AdminActions.AdminReadRaftCseq, '1')).rejects.toThrowError(AxiosError);
+            await expect(scubaClient.admin(AdminActions.AdminReadRaftCseq, '1')).rejects.toThrow(AxiosError);
 
             errorCode = 403;
             mockServer.setErrorResponse(errorCode);
@@ -371,7 +369,7 @@ describe('Test client', () => {
         it('should throw when receiving an error response from scuba', async () => {
             let errorCode = 500;
             mockServer.setErrorResponse(errorCode);
-            await expect(scubaClient.healthCheck()).rejects.toThrowError(AxiosError);
+            await expect(scubaClient.healthCheck()).rejects.toThrow(AxiosError);
 
             errorCode = 403;
             mockServer.setErrorResponse(errorCode);
@@ -383,8 +381,10 @@ describe('Test client', () => {
         });
 
         it('should throw ECONNREFUSED when not able to connect to the server', async () => {
-            mockServer.close();
-            await expect(scubaClient.healthCheck()).rejects.toThrowError('ECONNREFUSED');
+            await mockServer.close();
+            // When localhost resolves to both ::1 and 127.0.0.1, node reports the failed
+            // connection as an AggregateError with an empty message, so match on the code.
+            await expect(scubaClient.healthCheck()).rejects.toMatchObject({ code: 'ECONNREFUSED' });
         });
     });
 });
