@@ -10,6 +10,20 @@ The supported operations are:
 - Get the latest utilization metrics
 - Check the health of the Scuba service
 
+## Installation
+
+```bash
+yarn add @scality/scubaclient
+```
+
+The published package ships the compiled JavaScript along with its type
+declarations, so nothing is built at install time and consumers do not
+need a TypeScript compiler of their own.
+
+The package was previously installed from git under the unscoped name
+`scubaclient`, so existing consumers also need to update their imports:
+`require('scubaclient')` becomes `require('@scality/scubaclient')`.
+
 ## Contributing
 
 In order to contribute, please follow the
