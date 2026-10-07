@@ -52,7 +52,7 @@
   "dependencies": {
     "@aws-crypto/sha256-js": "^5.2.0",
     "@smithy/signature-v4": "^5.3.7",
-    "axios": "~1.18.1"
+    "axios": "~1.20.0"
   },
   "engines": {
     "node": ">= 16"

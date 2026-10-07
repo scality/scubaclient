@@ -158,8 +158,12 @@ export const createRequestFunction = function (
     BASE_PATH: string,
     configuration?: Configuration,
 ) {
-    return <T = unknown, R = AxiosResponse<T>>(axios: AxiosInstance = globalAxios, basePath: string = BASE_PATH) => {
+    // axios >= 1.19 types request() through a non-exported symbol, so the inferred type cannot be emitted in .d.ts
+    return <T = unknown, R = AxiosResponse<T>>(
+        axios: AxiosInstance = globalAxios,
+        basePath: string = BASE_PATH,
+    ): Promise<R> => {
         const axiosRequestArgs = { ...axiosArgs.options, url: (configuration?.basePath || basePath) + axiosArgs.url };
-        return axios.request<T, R>(axiosRequestArgs);
+        return axios.request<T, R>(axiosRequestArgs) as Promise<R>;
     };
 };
