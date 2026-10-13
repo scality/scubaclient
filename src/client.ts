@@ -83,8 +83,7 @@ export type GetMetricsBatchResponseResourceError = {
 };
 
 export type GetMetricsBatchResponseResource =
-    | GetMetricsBatchResponseResourceMetrics
-    | GetMetricsBatchResponseResourceError;
+    GetMetricsBatchResponseResourceMetrics | GetMetricsBatchResponseResourceError;
 
 export type GetMetricsBatchResponse = {
     metrics: GetMetricsBatchResponseResource[];
