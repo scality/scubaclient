@@ -157,7 +157,7 @@ export default class ScubaClient {
                 const query = parseQuerystring(search?.substring(1)) as Record<string, string | string[]>;
 
                 const requestToSign = {
-                    method: req.method?.toUpperCase()!,
+                    method: req.method?.toUpperCase() as string,
                     headers: { host, ...(req.headers as Record<string, any>) },
                     body: req.data,
                     host,
