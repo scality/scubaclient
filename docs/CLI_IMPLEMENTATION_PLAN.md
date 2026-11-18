@@ -2,7 +2,8 @@
 
 ## Overview
 
-Create a command-line interface for the Scuba API that wraps the existing ScubaClient SDK functionality in a separate CLI folder.
+Create a command-line interface for the Scuba API that wraps the existing
+ScubaClient SDK functionality in a separate CLI folder.
 
 ## Proposed CLI Structure
 
@@ -46,7 +47,8 @@ scuba internal account-metrics --canonical-id <id>
 
 - **Connection management**: Support configuration via:
   - CLI flags: `--host`, `--port`, `--https`, `--cert`, `--key`, `--ca`
-  - Environment variables: `SCUBA_HOST`, `SCUBA_PORT`, `SCUBA_HTTPS`, `SCUBA_CERT`, `SCUBA_KEY`, `SCUBA_CA`
+  - Environment variables: `SCUBA_HOST`, `SCUBA_PORT`, `SCUBA_HTTPS`,
+    `SCUBA_CERT`, `SCUBA_KEY`, `SCUBA_CA`
   - Config file: `~/.scuba/config.json`
 - **Authentication**: Support credentials via:
   - Environment variables: `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`, `REGION`
@@ -70,7 +72,8 @@ scuba internal account-metrics --canonical-id <id>
 
 ### 5. Environment Variables Support
 
-- **Connection**: `SCUBA_HOST`, `SCUBA_PORT`, `SCUBA_HTTPS`, `SCUBA_CERT`, `SCUBA_KEY`, `SCUBA_CA`, `SCUBA_KEEP_ALIVE`
+- **Connection**: `SCUBA_HOST`, `SCUBA_PORT`, `SCUBA_HTTPS`, `SCUBA_CERT`,
+  `SCUBA_KEY`, `SCUBA_CA`, `SCUBA_KEEP_ALIVE`
 - **Authentication**: `ACCESS_KEY_ID`, `SECRET_ACCESS_KEY`, `REGION`
 - **Behavior**: `SCUBA_OUTPUT_FORMAT` (json|table|raw)
 
@@ -632,12 +635,19 @@ require('./cli/lib/index.js');
 
 ## Implementation Guidelines for Agents
 
-1. **Start with CLI structure**: Create the directory structure first, then implement each component incrementally
-2. **Use existing ScubaClient**: Import and instantiate the existing client, don't reimplement API calls
-3. **Follow commander.js patterns**: Use commander's fluent API for consistent CLI behavior
-4. **Handle configuration layering**: Implement the precedence order (CLI flags > env vars > config file > defaults)
-5. **Add comprehensive error handling**: Catch and format all possible error types (network, validation, etc.)
+1. **Start with CLI structure**: Create the directory structure first, then
+   implement each component incrementally
+2. **Use existing ScubaClient**: Import and instantiate the existing client,
+   don't reimplement API calls
+3. **Follow commander.js patterns**: Use commander's fluent API for consistent
+   CLI behavior
+4. **Handle configuration layering**: Implement the precedence order
+   (CLI flags > env vars > config file > defaults)
+5. **Add comprehensive error handling**: Catch and format all possible error
+   types (network, validation, etc.)
 6. **Test incrementally**: Test each command as you implement it
-7. **Use TypeScript throughout**: Maintain type safety by importing types from the SDK
+7. **Use TypeScript throughout**: Maintain type safety by importing types from
+   the SDK
 
-This implementation approach keeps the CLI completely separate from the SDK while allowing it to leverage the existing ScubaClient functionality.
+This implementation approach keeps the CLI completely separate from the SDK
+while allowing it to leverage the existing ScubaClient functionality.
