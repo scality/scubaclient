@@ -29,6 +29,9 @@ jobs:
       - name: Run linter
         run: yarn lint --max-warnings 0
 
+      - name: Run Markdown linter
+        run: yarn lint_md
+
       - name: Check formatting
         run: yarn prettier:check
 
