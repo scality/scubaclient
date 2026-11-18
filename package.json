@@ -23,6 +23,7 @@
   "scripts": {
     "build": "tsc --strict",
     "lint": "eslint $(git ls-files '*.js' '*.ts' '*.cjs' '*.mjs')",
+    "lint_md": "mdlint $(git ls-files '*.md')",
     "prettier:check": "prettier --check .",
     "format": "prettier -w src tests && yarn lint --fix",
     "prepack": "yarn build",
