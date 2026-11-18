@@ -5,6 +5,12 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
     ...scality,
     {
+        files: ['**/*.js'],
+        languageOptions: {
+            sourceType: 'commonjs',
+        },
+    },
+    {
         files: ['**/*.ts'],
     },
     {
