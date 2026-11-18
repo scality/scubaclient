@@ -29,6 +29,9 @@ jobs:
       - name: Run linter
         run: yarn lint --max-warnings 0
 
+      - name: Check formatting
+        run: yarn prettier:check
+
       - name: Build typescript
         run: yarn build
 
