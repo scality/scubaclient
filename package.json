@@ -22,7 +22,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "build": "tsc --strict",
-    "lint": "eslint $(git ls-files '*.js' '*.ts')",
+    "lint": "eslint $(git ls-files '*.js' '*.ts' '*.cjs' '*.mjs')",
     "prettier:check": "prettier --check .",
     "format": "prettier -w src tests && yarn lint --fix",
     "prepack": "yarn build",
